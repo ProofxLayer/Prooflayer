@@ -1,0 +1,11 @@
+export type EvidenceKind = "PHOTO" | "PDF" | "URL" | "JSON";
+export type Verdict = "VERIFIED" | "REJECTED" | "NEEDS_REVIEW";
+export type CheckStatus = "PASS" | "FAIL" | "REVIEW";
+export type EvidenceInput = { evidenceId: string; kind: EvidenceKind; bytes?: Uint8Array; url?: string; mimeType?: string; text?: string };
+export type EvidenceDigest = { evidenceId: string; kind: EvidenceKind; sha256: string; mimeType?: string; byteLength: number };
+export type ExtractedEvidence = { evidenceId: string; text: string; metadata: Record<string, string | undefined> };
+export type VerificationPolicy = { id: string; version: string; label: string; description: string };
+export type AssessmentInput = { claim?: string; policy: VerificationPolicy; evidence: EvidenceInput[]; extracted: ExtractedEvidence[] };
+export type VerificationProvider = { extract(input: EvidenceInput[]): Promise<ExtractedEvidence[]>; assess(input: AssessmentInput): Promise<ModelAssessment> };
+export type ModelAssessment = { verdict: Verdict; confidence: number; checks: Array<{ id: string; status: CheckStatus; reason: string; evidenceRefs: string[] }>; contradictions: string[]; missingEvidence: string[]; limitations: string[]; modelVersion: string };
+export type VerificationResult = ModelAssessment & { claimId: string; policyId: string; policyVersion: string; evidence: EvidenceDigest[]; evidenceHash: string; resultHash: string; mode: "fixture" | "provider"; createdAt: string };

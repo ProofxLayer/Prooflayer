@@ -1,0 +1,22 @@
+{
+  "name": "@prooflayer/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:local": "hardhat run scripts/deploy.ts",
+    "deploy:testnet": "hardhat run scripts/deploy.ts --network xlayerTestnet",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "deploy:mainnet": "hardhat run scripts/deploy.ts --network xlayerMainnet"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "^5.4.0",
+    "hardhat": "^2.26.3",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1"
+  }
+}

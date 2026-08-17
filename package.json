@@ -1,0 +1,17 @@
+{
+  "name": "prooflayer",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.12.4",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm --workspace @prooflayer/web run dev",
+    "build": "npm run typecheck && npm --workspace @prooflayer/web run build",
+    "typecheck": "npm --workspace @prooflayer/verifier run typecheck && npm --workspace @prooflayer/web run typecheck && npm --workspace @prooflayer/contracts run typecheck && npm --workspace @prooflayer/db run typecheck",
+    "test": "npm --workspace @prooflayer/verifier run test && npm --workspace @prooflayer/contracts test",
+    "start": "npm --workspace @prooflayer/web run start"
+  }
+}

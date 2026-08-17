@@ -1,0 +1,127 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Verdict {
+  VERIFIED
+  REJECTED
+  NEEDS_REVIEW
+}
+
+enum EvidenceKind {
+  PHOTO
+  PDF
+  URL
+  JSON
+}
+
+model VerifierProfile {
+  id                String             @id
+  operatorAddress   String
+  manifestHash      String
+  pipelineVersion   String
+  policyVersion     String
+  active            Boolean            @default(true)
+  totalRuns         Int                @default(0)
+  verifiedRuns      Int                @default(0)
+  rejectedRuns      Int                @default(0)
+  reviewRuns        Int                @default(0)
+  humanAgreementBps Int?
+  lastHeartbeat     DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  verificationRuns  VerificationRun[]
+  attestations      Attestation[]
+}
+
+model Claim {
+  id             String           @id
+  claim          String
+  subjectAddress String?
+  policyId       String
+  policyVersion  String
+  status         Verdict?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  evidence       EvidenceItem[]
+  runs           VerificationRun[]
+  attestation    Attestation?
+  auditEvents    AuditEvent[]
+  challenges     Challenge[]
+}
+
+model EvidenceItem {
+  id         String       @id
+  claimId    String
+  kind       EvidenceKind
+  mimeType   String?
+  storageKey String?
+  sourceHash String
+  byteLength Int
+  text       String?
+  url        String?
+  createdAt  DateTime     @default(now())
+  claim      Claim        @relation(fields: [claimId], references: [id], onDelete: Cascade)
+}
+
+model VerificationRun {
+  id             String          @id
+  claimId        String
+  verifierId     String
+  verdict        Verdict
+  confidence     Int
+  resultHash     String
+  modelVersion   String
+  policyVersion  String
+  limitations    Json
+  resultPayload  Json?
+  createdAt      DateTime        @default(now())
+  claim          Claim           @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  verifier       VerifierProfile @relation(fields: [verifierId], references: [id])
+  auditEvents    AuditEvent[]
+}
+
+model Attestation {
+  id              String          @id
+  claimId         String          @unique
+  verifierId      String
+  chainId         Int
+  contractAddress String
+  transactionHash String?
+  evidenceHash    String
+  resultHash      String
+  policyHash      String
+  verdict         Verdict
+  confidence      Int
+  revoked         Boolean         @default(false)
+  createdAt       DateTime        @default(now())
+  claim           Claim            @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  verifier        VerifierProfile @relation(fields: [verifierId], references: [id])
+}
+
+model AuditEvent {
+  id                String           @id
+  claimId           String
+  verificationRunId String?
+  type              String
+  payload           Json
+  createdAt         DateTime         @default(now())
+  claim             Claim            @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  verificationRun   VerificationRun? @relation(fields: [verificationRunId], references: [id], onDelete: SetNull)
+}
+
+model Challenge {
+  id          String   @id
+  claimId     String
+  challenger  String
+  reason      String
+  status      String   @default("OPEN")
+  createdAt   DateTime @default(now())
+  resolvedAt  DateTime?
+  claim       Claim    @relation(fields: [claimId], references: [id], onDelete: Cascade)
+}
