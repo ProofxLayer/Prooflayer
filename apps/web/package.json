@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "typecheck": "tsc -p tsconfig.json",
-    "start": "next start"
+    "start": "next start",
+    "postinstall": "prisma generate --schema ../../packages/db/prisma/schema.prisma"
   },
   "dependencies": {
     "@prisma/client": "6.19.3",
